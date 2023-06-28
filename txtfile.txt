@@ -1,0 +1,248 @@
+	<?php
+	$orderby = 'name';
+	$order = 'asc';
+	$hide_empty = false;
+	$cat_args = array(
+		'orderby'    => $orderby,
+		'order'      => $order,
+		'hide_empty' => $hide_empty,
+	);
+
+	$product_categories = get_terms('product_cat', $cat_args);
+
+	if (!empty($product_categories)) {
+		echo '<ul>';
+		foreach ($product_categories as $key => $category) {
+			echo '<li class="active li type" id="get_term_link($category)">';
+			echo '<a href="' . get_term_link($category) . '" >';
+			<span class="type">echo $category->name;</span>
+			<span><i class="fas fa-chevron-right"></i></span>
+			echo '</a>';
+			echo '</li>';
+		}
+		echo '</ul>
+ 
+ 
+';
+	}
+
+	?>
+
+tags
+
+<?php 
+            $args = array(
+                'number'     => $number,
+                'orderby'    => 'title',
+                'order'      => 'ASC',
+                'hide_empty' => $hide_empty,
+                'include'    => $ids
+            );
+            $product_tags = get_terms( 'product_tag', $args );
+            $count = count($product_tags);
+            if ( $count > 0 ){
+                foreach ( $product_tags as $product_tag ) {
+                    // echo '<h4><a href="' . get_term_link( $product_tag ) . '">' . $product_tag->name . '</a></h4>';
+                    $args = array(
+                        'posts_per_page' => -1,
+                        'tax_query' => array(
+                            'relation' => 'AND',
+                            array(
+                                'taxonomy' => 'product_tag',
+                                'field' => 'slug',
+                                // 'terms' => 'white-wines'
+                                'terms' => $product_tag->slug,
+                                'product_tag'=> "latest-product"
+                            )
+                        ),
+                        'post_type' => 'product',
+                        'orderby' => 'title,'
+                    );
+                    $products = new WP_Query( $args );
+                    echo "<ul>";
+                    while ( $products->have_posts() ) {
+                        $products->the_post();
+                        ?>
+                            <li>
+                                <a href="<?php the_permalink(); ?>">
+                                    <?php the_title(); ?>
+                                    <?php echo get_the_post_thumbnail( $post_id, 'thumbnail' ); ?>
+                                </a>
+                            </li>
+                        <?php
+                    }
+                    echo "</ul>";
+                }
+            }
+         ?>
+
+
+									product_tag is non-hierarchical product category. To fetch the products you will need to run the query as below :
+
+
+	add_action("admin_init","display_products");
+function display_products()
+{
+ ob_start();
+
+ $args = array( 
+            'post_type'      => 'product', 
+            'posts_per_page' => -1, 
+            'product_tag'    => array('latest-product')
+            );
+ $loop = new WP_Query( $args );
+ $product_count = $loop->post_count;
+
+
+ if( $product_count > 0 ){
+    echo '<ul class="products">';
+    while ( $loop->have_posts() ) : $loop->the_post(); 
+            global $product;
+            global $post;
+
+            echo "<li>" . $loop->post->ID. " </li>";
+
+
+    endwhile;
+
+    echo '</ul>';
+ }else{
+       echo 'No product matching your criteria.';
+ }
+
+ $result =  ob_get_clean();
+ echo $result;
+ }
+
+
+
+	get product by category
+
+	 $args = array(
+    'post_type'             => 'product',
+    'post_status'           => 'publish',
+    'ignore_sticky_posts'   => 1,
+    'posts_per_page'        => '12',
+    'tax_query'             => array(
+        array(
+            'taxonomy'      => 'product_cat',
+            'field' => 'term_id', //This is optional, as it defaults to 'term_id'
+            'terms'         => 26,
+            'operator'      => 'IN' // Possible values are 'IN', 'NOT IN', 'AND'.
+        ),
+        array(
+            'taxonomy'      => 'product_visibility',
+            'field'         => 'slug',
+            'terms'         => 'exclude-from-catalog', // Possibly 'exclude-from-search' too
+            'operator'      => 'NOT IN'
+        )
+    )
+);
+$products = new WP_Query($args);
+var_dump($products);
+
+
+$args = array(
+   'post_type'             => 'product',
+   'post_status'           => 'publish',
+   'ignore_sticky_posts'   => 1,
+   'posts_per_page'        => '12',
+   'tax_query'             => array(
+        array(
+            'taxonomy'  => 'product_cat',
+            'field'     => 'term_id',
+            'terms'     => array('40'),
+            'operator'  => 'IN',
+        )
+   )
+);
+
+$loop = new WP_Query( $args );
+
+
+
+///////////////////
+
+<?php
+/**
+ * Plugin Name: WooCommerce - List Products by Tags
+ * Plugin URI: http://www.remicorson.com/list-woocommerce-products-by-tags/
+ * Description: List WooCommerce products by tags using a shortcode, ex: [woo_products_by_tags tags="shoes,socks"]
+ * Version: 1.0
+ * Author: Remi Corson
+ * Author URI: http://remicorson.com
+ * Requires at least: 3.5
+ * Tested up to: 3.5
+ *
+ * Text Domain: -
+ * Domain Path: -
+ *
+ */
+
+/*
+ * List WooCommerce Products by tags
+ *
+ * ex: [woo_products_by_tags tags="shoes,socks"]
+ */
+function woo_products_by_tags_shortcode( $atts, $content = null ) {
+  
+	// Get attribuets
+	extract(shortcode_atts(array(
+		"tags" => ''
+	), $atts));
+	
+	ob_start();
+
+	// Define Query Arguments
+	$args = array( 
+				'post_type' 	 => 'product', 
+				'posts_per_page' => 5, 
+				'product_tag' 	 => $tags 
+				);
+	
+	// Create the new query
+	$loop = new WP_Query( $args );
+	
+	// Get products number
+	$product_count = $loop->post_count;
+	
+	// If results
+	if( $product_count > 0 ) :
+	
+		echo '<ul class="products">';
+		
+			// Start the loop
+			while ( $loop->have_posts() ) : $loop->the_post(); global $product;
+			
+				global $post;
+				
+				echo "<p>" . $thePostID = $post->post_title. " </p>";
+				
+				if (has_post_thumbnail( $loop->post->ID )) 
+					echo  get_the_post_thumbnail($loop->post->ID, 'shop_catalog'); 
+				else 
+					echo '<img src="'.$woocommerce->plugin_url().'/assets/images/placeholder.png" alt="" width="'.$woocommerce->get_image_size('shop_catalog_image_width').'px" height="'.$woocommerce->get_image_size('shop_catalog_image_height').'px" />';
+		
+			endwhile;
+		
+		echo '</ul><!--/.products-->';
+	
+	else :
+	
+		_e('No product matching your criteria.');
+	
+	endif; // endif $product_count > 0
+	
+	return ob_get_clean();
+
+}
+
+add_shortcode("woo_products_by_tags", "woo_products_by_tags_shortcode");
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
