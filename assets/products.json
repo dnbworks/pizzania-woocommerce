@@ -1,0 +1,125 @@
+[
+	{
+		"id": 230,
+		"slug": "shrimp-pasta",
+		"type": "product",
+		"title": "shrimp pasta",
+		"price": "",
+		"product_cat": [
+			15
+		],
+		"product_tag": []
+	},
+	{
+		"id": 228,
+		"slug": "chicken-pizza-combo",
+		"status": "publish",
+		"type": "product",
+		"title": "chicken + pizza combo",
+		"price": "",
+		"product_cat": [
+			18,
+			22
+		],
+		"product_tag": []
+	},
+	{
+		"id": 226,
+		"slug": "marinaded-pasta",
+		"status": "publish",
+		"type": "product",
+		"link": "http://pizza.local/product/marinaded-pasta/",
+		"title": {
+			"rendered": "Marinaded pasta"
+		},
+
+		"product_cat": [
+			15,
+			22
+		],
+		"product_tag": []
+
+	},
+	{
+		"id": 107,
+		"slug": "prima-lasagna",
+		"type": "product",
+		"title": {
+			"rendered": "PRIMA LASAGNA"
+		},
+		"product_cat": [
+			18,
+			22
+		],
+		"product_tag": []
+	},
+	{
+		"id": 105,
+		"slug": "seafood_marinara",
+		"type": "product",
+		"title": {
+			"rendered": "SEAFOOD MARINARA"
+		},
+		"product_cat": [
+			18
+		],
+		"product_tag": []
+	},
+	{
+		"id": 102,
+		"slug": "shrimp-aglio-olio",
+		"type": "product",
+		"title": {
+			"rendered": "SHRIMP AGLIO OLIO"
+		},
+		"product_cat": [
+			15,
+			22
+		],
+		"product_tag": []
+	},
+	{
+		"id": 100,
+		"slug": "family-large-group-2",
+		"type": "product",
+		"title": {
+			"rendered": "Family Large group 2"
+		},
+		"product_tag": []
+	},
+	{
+		"id": 98,
+		"slug": "sprite-glass",
+		"status": "publish",
+		"type": "product",
+		"title": {
+			"rendered": "sprite glass"
+		},
+		
+		"product_tag": []
+	},
+	{
+		"id": 96,
+		"slug": "coke-zero-glass",
+		"type": "product",
+		"title": {
+			"rendered": "coke zero glass"
+		},
+		"product_cat": [
+			20
+		],
+		"product_tag": []
+	},
+	{
+		"id": 94,
+		"slug": "family-dish-group-3",
+		"type": "product",
+		"title": {
+			"rendered": "family dish group 3"
+		},
+		"product_cat": [
+			17
+		],
+		"product_tag": []
+	}
+]

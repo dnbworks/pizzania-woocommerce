@@ -1,32 +1,4 @@
-	<?php
-	$orderby = 'name';
-	$order = 'asc';
-	$hide_empty = false;
-	$cat_args = array(
-		'orderby'    => $orderby,
-		'order'      => $order,
-		'hide_empty' => $hide_empty,
-	);
 
-	$product_categories = get_terms('product_cat', $cat_args);
-
-	if (!empty($product_categories)) {
-		echo '<ul>';
-		foreach ($product_categories as $key => $category) {
-			echo '<li class="active li type" id="get_term_link($category)">';
-			echo '<a href="' . get_term_link($category) . '" >';
-			<span class="type">echo $category->name;</span>
-			<span><i class="fas fa-chevron-right"></i></span>
-			echo '</a>';
-			echo '</li>';
-		}
-		echo '</ul>
- 
- 
-';
-	}
-
-	?>
 
 tags
 
@@ -245,4 +217,131 @@ add_shortcode("woo_products_by_tags", "woo_products_by_tags_shortcode");
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+store category_id and turn them to json
+pass it to frontend
 
+
+	<?php
+							$arg = array(
+								'post_type' => 'product',
+								'posts_per_page' => 6,
+								'tax_query' => array(
+									array(
+										'taxonomy' => 'product_cat',
+										'field' => 'slug',
+										'terms' => array('special-offer'),
+										'operator' => 'IN'
+									)
+								)
+							);
+
+							$products_by_cat = new WP_Query($arg);
+							if ($products_by_cat->have_posts()) {
+								while ($products_by_cat->have_posts()) {
+									$products_by_cat->the_post();
+
+									$product = wc_get_product(get_the_id()); // Get the WC_Product Object
+				
+									if ($product->is_type('variable')) {
+										$product = new WC_Product_Variable(get_the_id());
+										$variation_variations = $product->get_variation_attributes(); // get all attributes by variations
+									} else {
+										$variation_variations = false;
+									}
+
+									$image = wp_get_attachment_image_src(get_post_thumbnail_id(get_the_ID()), 'medium');
+
+									$product_array = array(
+										'product_name' => get_the_title(),
+										'product_image' => $image[0],
+										"product_slug" => $product->get_slug(),
+										'product_price' => $product->get_regular_price(),
+										'product_categories' => $product->get_category_ids(),
+										'is_variable' => $product->is_type('variable')
+									);
+
+							?>
+						
+									<div class="item" data-product='<?php echo json_encode($product_array);  ?>' id="<?php echo get_the_ID(); ?>" data-attributes='<?php echo json_encode($variation_variations);  ?>' data-name="<?php echo $product->get_slug() ?>" data-category="<?php echo $product_cat->name; ?>">
+										<div class="views-field views-field-field-product-image">
+											<div class="field-content">
+												<a href="#">
+													<div class="media media--blazy  media--image">
+														<img height="220" width="220" class="b-lazy media__image media__element b-loaded" alt="" src="<?php echo $image[0]; ?>" typeof="foaf:Image">
+													</div>
+												</a>
+											</div>
+										</div>
+										<div class="views-field product-list-title">
+											<a href="#" hreflang="en"><?php echo get_the_title(); ?></a>
+										</div>
+
+										<div class="views-field views-field-price__number">
+											<span class="field-content">starts at
+												<?php
+												wc_get_template('loop/price.php');
+												?>
+											</span>
+										</div>
+
+										<div style="text-align: center;">
+											<a href="<?php echo esc_url(sprintf('%1$s/?add-to-cart=%2$s', site_url(), get_the_ID())); ?>" class="px-3 py-1 rounded-sm mr-3 text-sm border-solid border border-current hover:bg-purple-600 hover:text-white hover:border-purple-600">
+												Order Now
+											</a>
+										</div>
+
+									</div>
+
+                                    <?php
+							}
+
+						}
+						wp_reset_postdata();
+				?>
+
+				
+
+with woocommerce on we can use wp_localise
+
+
+
+   <div class="majc-cart-items" data-itemId="<?php echo esc_attr($itemVal['product_id']); ?>" data-cKey="<?php echo esc_attr($itemVal['key']); ?>">
+                                <div class="majc-cart-items-inner">
+                                    <?php
+                                    $product = wc_get_product($itemVal['data']->get_id());
+                                    $product_id = apply_filters('woocommerce_cart_item_product_id', $itemVal['product_id'], $itemVal, $itemKey);
+                                    $getProductDetail = wc_get_product($itemVal['product_id']);
+                                    ?>
+                                    <div class="majc-item-img">
+                                        <?php echo $getProductDetail->get_image('thumbnail'); ?>
+                                    </div>
+
+                                    <div class="majc-item-desc">
+                                        <div class="majc-item-remove">
+                                            <?php
+                                            echo apply_filters('woocommerce_cart_item_remove_link', sprintf('<a href="%s" class="majc-remove"  aria-label="%s" data-cart_item_id="%s" data-cart_item_sku="%s" data-cart_item_key="%s"><span class="icon_trash_alt"></span></a>', esc_url(wc_get_cart_remove_url($itemKey)), esc_html__('Remove this item', 'mini-ajax-cart'), esc_attr($product_id), esc_attr($product->get_sku()), esc_attr($itemKey)
+                                                    ), $itemKey);
+                                            ?>
+                                        </div>
+
+                                        <div class="majc-item-name">
+                                            <?php echo esc_html($product->get_name()); ?>
+                                        </div>
+
+                                        <div class="majc-item-price">
+                                            <?php
+                                            $wc_product = $itemVal['data'];
+                                            echo WC()->cart->get_product_subtotal($wc_product, $itemVal['quantity']);
+                                            ?>
+                                        </div>
+
+                                        <div class="majc-item-qty">
+                                            <span class="majc-qty-minus majc-qty-chng icon_minus-06"></span>
+
+                                            <input type="number" name="majc-qty-input" class="majc-qty" step="1" min="0" max="14" value="<?php echo intval($itemVal['quantity']); ?>" placeholder="" inputmode="numeric">
+
+                                            <span class="majc-qty-plus majc-qty-chng icon_plus"></span>
+                                        </div>
+                                    </div> <!-- majc-item-desc -->
+                                </div> <!-- majc-cart-items-inner -->
+                            </div> <!-- majc-cart-items -->

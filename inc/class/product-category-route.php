@@ -28,7 +28,7 @@ function search_results($param)
 		)
 	);
 
-	$results = array();
+	$results = array('data' => array());
 
 	$products_by_cat = new WP_Query($arg);
 
@@ -48,13 +48,12 @@ function search_results($param)
 			if ($product->is_type('variable')) {
 			}
 
-			array_push($results, [
+			array_push($results['data'], [
 				'product_id'            => $product_id,
-				'product'               => $product,
 				'product_thumbnail_url' => $product_thumbnail_url,
 				'product_title' 								=> $product_title,
 				'product_link' 									=> $product_link,
-				'product_price' 								=> $product_price
+				'product_price' 								=> $product_price 
 			]);
 		}
 	} else {
@@ -69,7 +68,8 @@ function search_results($param)
 		'prev_text' => __('« Prev', 'aquila'),
 		'next_text' => __('Next »', 'aquila'),
 	]);
-	return $results;
+	return json_encode($results);
+	
 }
 
 add_action('rest_api_init', 'pizza_register_search');
